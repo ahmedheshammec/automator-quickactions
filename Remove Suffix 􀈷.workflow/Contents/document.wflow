@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>AMApplicationBuild</key>
-	<string>526</string>
+	<string>527</string>
 	<key>AMApplicationVersion</key>
 	<string>2.10</string>
 	<key>AMDocumentVersion</key>
@@ -61,33 +61,86 @@
 					<key>COMMAND_STRING</key>
 					<string>#!/bin/bash
 
-# Check if a directory path is provided
-if [ $# -eq 0 ]; then
-    echo "Please provide a directory path as an argument."
-    echo "Usage: $0 /path/to/directory"
-    exit 1
+# Function to remove tailing numbers
+remove_tailing_numbers() {
+    local filename="$1"
+    # Remove trailing numbers and underscores/hyphens before them
+    echo "$filename" | sed -E 's/[_-]?[0-9]+(\.[^.]*)$/\1/'
+}
+
+# Function to remove brackets and content inside them
+remove_brackets() {
+    local filename="$1"
+    # Remove brackets and content inside them, including any surrounding spaces
+    echo "$filename" | sed -E 's/\s*\[[^]]+\]\s*//'
+}
+
+# Function to remove both tailing numbers and brackets
+remove_both() {
+    local filename="$1"
+    # First remove brackets and content inside them
+    filename=$(echo "$filename" | sed -E 's/\s*\[[^]]+\]\s*//')
+    # Then remove trailing numbers and underscores/hyphens before them
+    echo "$filename" | sed -E 's/[_-]?[0-9]+(\.[^.]*)$/\1/'
+}
+
+remove_trailing_whitespace() {
+    local filename="$1"
+    # Remove any trailing whitespace before the file extension
+    echo "$filename" | sed -E 's/[[:space:]]+(\.[^.]*)$/\1/'
+}
+
+# Prompt user for choice
+choice=$(
+    osascript &lt;&lt;EOF
+    set selectedOption to choose from list {"Remove Tailing Numbers Only", "Remove Tailing Brackets", "Remove Both"} with title "File Renaming Options" with prompt "Choose an option:" default items {"Remove Tailing Numbers Only"}
+    if selectedOption is false then
+        return "Cancel"
+    else
+        return item 1 of selectedOption
+    end if
+EOF
+)
+
+# Exit if the user cancels
+if [[ "$choice" == "Cancel" ]]; then
+    exit 0
 fi
 
-# Store the directory path
-directory="$1"
+# Process files based on user choice
+for file in "$@"; do
+    # Get the directory and base name of the file
+    dir=$(dirname "$file")
+    base=$(basename "$file")
 
-# Change to the specified directory
-cd "$directory" || exit 1
+    # Apply the appropriate renaming logic
+    case "$choice" in
+        "Remove Tailing Numbers Only")
+            new_name=$(remove_tailing_numbers "$base")
+            ;;
+        "Remove Tailing Brackets")
+            new_name=$(remove_brackets "$base")
+            ;;
+        "Remove Both")
+            new_name=$(remove_both "$base")
+            ;;
+        *)
+            echo "Invalid choice."
+            exit 1
+            ;;
+    esac
 
-# Loop through files matching the pattern
-for file in *_[0-9]*.mp4; do
-    # Check if the file exists (to avoid errors if no matching files)
-    [ -e "$file" ] || continue
+    # Ensure no trailing whitespace remains before the extension
+    new_name=$(remove_trailing_whitespace "$new_name")
 
-    # Create the new filename by removing the _[numbers] before .mp4
-    new_filename=$(echo "$file" | sed 's/_[0-9]*\(\.[^.]*\)$/\1/')
-
-    # Rename the file
-    mv "$file" "$new_filename"
+    # Rename the file if the name has changed
+    if [[ "$new_name" != "$base" ]]; then
+        mv "$file" "$dir/$new_name"
+    fi
 done
 
-# Display macOS notification
-osascript -e 'display notification "Files have been renamed successfully" with title "File Renaming Complete"'</string>
+# Notify the user that the task is complete
+osascript -e 'display notification "All files have been renamed successfully." with title "File Renaming Complete"'</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>
@@ -112,7 +165,7 @@ osascript -e 'display notification "Files have been renamed successfully" with t
 				<key>Class Name</key>
 				<string>RunShellScriptAction</string>
 				<key>InputUUID</key>
-				<string>032B4EB8-D83B-4CEF-A7F6-B958BADAC964</string>
+				<string>97D8D47A-D1CA-4DE5-B56D-A888023789D4</string>
 				<key>Keywords</key>
 				<array>
 					<string>Shell</string>
@@ -122,9 +175,9 @@ osascript -e 'display notification "Files have been renamed successfully" with t
 					<string>Unix</string>
 				</array>
 				<key>OutputUUID</key>
-				<string>88062621-690E-4010-B54E-B219420624B0</string>
+				<string>5328F0B5-1A30-4FC7-97DF-305A9C3FB30E</string>
 				<key>UUID</key>
-				<string>362C36AF-D3BC-4172-B7E1-64C23A3EB252</string>
+				<string>454357B1-0A64-43C4-862C-053FBC766E9C</string>
 				<key>UnlocalizedApplications</key>
 				<array>
 					<string>Automator</string>
@@ -200,7 +253,7 @@ osascript -e 'display notification "Files have been renamed successfully" with t
 				<key>isViewVisible</key>
 				<integer>1</integer>
 				<key>location</key>
-				<string>547.500000:305.000000</string>
+				<string>406.000000:305.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Run Shell Script.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>
@@ -344,7 +397,7 @@ osascript -e 'display notification "Files have been renamed successfully" with t
 		<key>backgroundColorName</key>
 		<string>systemGrayColor</string>
 		<key>inputTypeIdentifier</key>
-		<string>com.apple.Automator.fileSystemObject.folder</string>
+		<string>com.apple.Automator.fileSystemObject</string>
 		<key>outputTypeIdentifier</key>
 		<string>com.apple.Automator.nothing</string>
 		<key>presentationMode</key>
@@ -356,13 +409,13 @@ osascript -e 'display notification "Files have been renamed successfully" with t
 		<key>serviceApplicationPath</key>
 		<string>/System/Library/CoreServices/Finder.app</string>
 		<key>serviceInputTypeIdentifier</key>
-		<string>com.apple.Automator.fileSystemObject.folder</string>
+		<string>com.apple.Automator.fileSystemObject</string>
 		<key>serviceOutputTypeIdentifier</key>
 		<string>com.apple.Automator.nothing</string>
 		<key>serviceProcessesInput</key>
 		<false/>
 		<key>systemImageName</key>
-		<string>NSTouchBarDocuments</string>
+		<string>NSTouchBarCompose</string>
 		<key>useAutomaticInputType</key>
 		<false/>
 		<key>workflowTypeIdentifier</key>

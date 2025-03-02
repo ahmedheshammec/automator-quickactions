@@ -10,11 +10,11 @@
 			<key>NSBackgroundSystemColorName</key>
 			<string>systemGrayColor</string>
 			<key>NSIconName</key>
-			<string>NSTouchBarDocuments</string>
+			<string>NSTouchBarCompose</string>
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>Remove Number Suffix</string>
+				<string>Remove Suffix 􀈷</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>runWorkflowAsService</string>
@@ -25,7 +25,7 @@
 			</dict>
 			<key>NSSendFileTypes</key>
 			<array>
-				<string>public.folder</string>
+				<string>public.item</string>
 			</array>
 		</dict>
 	</array>
