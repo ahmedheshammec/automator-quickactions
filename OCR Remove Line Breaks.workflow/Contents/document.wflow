@@ -60,58 +60,36 @@
 				<dict>
 					<key>COMMAND_STRING</key>
 					<string>#!/bin/bash
- 
+
 pathname=$(dirname "$@")
 cd "$pathname"
 
+# Function to process the RTF file
+process_file() {
+    # Convert RTF to plain text while preserving Arabic characters
+    text=$(textutil -convert txt -stdout output.rtf 2&gt;/dev/null)
 
-# Prompt user for choice
-choice=$(
-    osascript &lt;&lt;EOF
-    set selectedOption to choose from list {"artwork.png", "artwork.jpeg", "artwork.jpg"} with title "Artwork Name" with prompt "Choose an option:" default items {"artwork.png"}
-    if selectedOption is false then
-        return "Cancel"
-    else
-        return item 1 of selectedOption
-    end if
-EOF
-)
-
-
-# Exit if the user cancels
-if [[ "$choice" == "Cancel" ]]; then
-    exit 0
-fi
-
-# Check if a directory is provided as an argument
-if [[ $# -ne 1 ]]; then
-    exit 1
-fi
-
-
-# Process files in the directory
-for file in "$@"; do
-    # Skip directories
-    if [[ -d "$file" ]]; then
-        continue
+    # Ensure that text is properly retrieved before proceeding
+    if [[ -z "$text" ]]; then
+        echo "Error: Failed to extract text from output.rtf" &gt;&amp;2
+        exit 1
     fi
 
-    # Apply the appropriate renaming logic
-    case "$choice" in
-        "artwork.png")
-            /opt/homebrew/bin/AtomicParsley "$file" --artwork artwork.png
-            ;;
-        "artwork.jpeg")
-            /opt/homebrew/bin/AtomicParsley "$file" --artwork artwork.jpeg
-            ;;
-        "artwork.jpg")
-            /opt/homebrew/bin/AtomicParsley "$file" --artwork artwork.jpg
-            ;;
-        *)
-            exit 1
-            ;;
-    esac
-done
+    # Append a space at the end of each line and remove newlines
+    echo "$text" | sed 's/$/ /' | tr -d '\n' &gt; output_plain.txt
+
+    # Convert the processed text back to RTF format
+    textutil -convert rtf -inputencoding UTF-8 -output output_processed.rtf output_plain.txt 2&gt;/dev/null
+}
+
+# Redirect both stdout and stderr to /dev/null to suppress unwanted messages
+exec &gt; /dev/null 2&gt;&amp;1
+
+# Run the function
+process_file
+
+rm output_plain.txt
+
 osascript -e 'display notification "Success" with title "Done!"'</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
@@ -137,7 +115,7 @@ osascript -e 'display notification "Success" with title "Done!"'</string>
 				<key>Class Name</key>
 				<string>RunShellScriptAction</string>
 				<key>InputUUID</key>
-				<string>D888AC94-7521-4E10-8E91-9A8F0CFAA206</string>
+				<string>064FC1EF-5493-4EEB-BA9C-145CE46CCAC5</string>
 				<key>Keywords</key>
 				<array>
 					<string>Shell</string>
@@ -147,9 +125,9 @@ osascript -e 'display notification "Success" with title "Done!"'</string>
 					<string>Unix</string>
 				</array>
 				<key>OutputUUID</key>
-				<string>515E5D7C-BF8F-4992-B1D8-0B569D87F3D5</string>
+				<string>C4606882-B273-43B2-AA09-7C36A2008DD8</string>
 				<key>UUID</key>
-				<string>AD233CD4-D1CE-4E4A-8AA0-0E418850B5BF</string>
+				<string>FD219E1E-D20E-4A95-BA2F-53D0CE9C11E1</string>
 				<key>UnlocalizedApplications</key>
 				<array>
 					<string>Automator</string>
@@ -222,10 +200,12 @@ osascript -e 'display notification "Success" with title "Done!"'</string>
 						<string>4</string>
 					</dict>
 				</dict>
+				<key>conversionLabel</key>
+				<integer>0</integer>
 				<key>isViewVisible</key>
 				<integer>1</integer>
 				<key>location</key>
-				<string>406.000000:305.000000</string>
+				<string>473.500000:305.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Run Shell Script.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>
@@ -237,19 +217,10 @@ osascript -e 'display notification "Success" with title "Done!"'</string>
 	<dict/>
 	<key>workflowMetaData</key>
 	<dict>
-		<key>applicationBundleID</key>
-		<string>com.apple.finder</string>
 		<key>applicationBundleIDsByPath</key>
-		<dict>
-			<key>/System/Library/CoreServices/Finder.app</key>
-			<string>com.apple.finder</string>
-		</dict>
-		<key>applicationPath</key>
-		<string>/System/Library/CoreServices/Finder.app</string>
+		<dict/>
 		<key>applicationPaths</key>
-		<array>
-			<string>/System/Library/CoreServices/Finder.app</string>
-		</array>
+		<array/>
 		<key>backgroundColor</key>
 		<data>
 		YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9i
@@ -376,10 +347,6 @@ osascript -e 'display notification "Success" with title "Done!"'</string>
 		<integer>15</integer>
 		<key>processesInput</key>
 		<false/>
-		<key>serviceApplicationBundleID</key>
-		<string>com.apple.finder</string>
-		<key>serviceApplicationPath</key>
-		<string>/System/Library/CoreServices/Finder.app</string>
 		<key>serviceInputTypeIdentifier</key>
 		<string>com.apple.Automator.fileSystemObject</string>
 		<key>serviceOutputTypeIdentifier</key>

@@ -60,15 +60,15 @@
 				<dict>
 					<key>COMMAND_STRING</key>
 					<string>#!/bin/bash
- 
 pathname=$(dirname "$@")
 cd "$pathname"
 
+/opt/homebrew/bin/tesseract "$@" 
 
 # Prompt user for choice
 choice=$(
     osascript &lt;&lt;EOF
-    set selectedOption to choose from list {"artwork.png", "artwork.jpeg", "artwork.jpg"} with title "Artwork Name" with prompt "Choose an option:" default items {"artwork.png"}
+    set selectedOption to choose from list {"Arabic", "Arabic + English"} with title "Choose Language" with prompt "Choose an option:" default items {"Arabic"}
     if selectedOption is false then
         return "Cancel"
     else
@@ -77,17 +77,10 @@ choice=$(
 EOF
 )
 
-
 # Exit if the user cancels
 if [[ "$choice" == "Cancel" ]]; then
     exit 0
 fi
-
-# Check if a directory is provided as an argument
-if [[ $# -ne 1 ]]; then
-    exit 1
-fi
-
 
 # Process files in the directory
 for file in "$@"; do
@@ -98,14 +91,11 @@ for file in "$@"; do
 
     # Apply the appropriate renaming logic
     case "$choice" in
-        "artwork.png")
-            /opt/homebrew/bin/AtomicParsley "$file" --artwork artwork.png
+        "Arabic")
+            /opt/homebrew/bin/tesseract "$file" output -l ara
             ;;
-        "artwork.jpeg")
-            /opt/homebrew/bin/AtomicParsley "$file" --artwork artwork.jpeg
-            ;;
-        "artwork.jpg")
-            /opt/homebrew/bin/AtomicParsley "$file" --artwork artwork.jpg
+        "Arabic + English")
+            /opt/homebrew/bin/tesseract "$file" output -l ara+eng
             ;;
         *)
             exit 1
@@ -137,7 +127,7 @@ osascript -e 'display notification "Success" with title "Done!"'</string>
 				<key>Class Name</key>
 				<string>RunShellScriptAction</string>
 				<key>InputUUID</key>
-				<string>D888AC94-7521-4E10-8E91-9A8F0CFAA206</string>
+				<string>47064266-A60F-404C-854E-EFBDF789B728</string>
 				<key>Keywords</key>
 				<array>
 					<string>Shell</string>
@@ -147,9 +137,9 @@ osascript -e 'display notification "Success" with title "Done!"'</string>
 					<string>Unix</string>
 				</array>
 				<key>OutputUUID</key>
-				<string>515E5D7C-BF8F-4992-B1D8-0B569D87F3D5</string>
+				<string>35A0469C-5F55-4B76-9BDA-B5AE0FBDF961</string>
 				<key>UUID</key>
-				<string>AD233CD4-D1CE-4E4A-8AA0-0E418850B5BF</string>
+				<string>C12FD392-4D4C-447C-95B0-B815C1919BE8</string>
 				<key>UnlocalizedApplications</key>
 				<array>
 					<string>Automator</string>
@@ -222,6 +212,8 @@ osascript -e 'display notification "Success" with title "Done!"'</string>
 						<string>4</string>
 					</dict>
 				</dict>
+				<key>conversionLabel</key>
+				<integer>0</integer>
 				<key>isViewVisible</key>
 				<integer>1</integer>
 				<key>location</key>

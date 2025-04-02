@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>AMApplicationBuild</key>
-	<string>526</string>
+	<string>528</string>
 	<key>AMApplicationVersion</key>
 	<string>2.10</string>
 	<key>AMDocumentVersion</key>
@@ -66,7 +66,7 @@ for f in "$@"; do
     
     # construct command
     cd "${pathname}"
-	input_filepath="input.png"
+	input_filepath="${f}"
 	output_iconset_name="output.iconset"
 	/bin/mkdir $output_iconset_name
 
@@ -194,12 +194,10 @@ done</string>
 						<string>4</string>
 					</dict>
 				</dict>
-				<key>conversionLabel</key>
-				<integer>0</integer>
 				<key>isViewVisible</key>
 				<integer>1</integer>
 				<key>location</key>
-				<string>547.500000:305.000000</string>
+				<string>473.500000:305.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Run Shell Script.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>
@@ -361,7 +359,7 @@ done</string>
 		<key>serviceProcessesInput</key>
 		<false/>
 		<key>systemImageName</key>
-		<string>NSTouchBarWork</string>
+		<string>NSTouchBarDocuments</string>
 		<key>useAutomaticInputType</key>
 		<false/>
 		<key>workflowTypeIdentifier</key>
