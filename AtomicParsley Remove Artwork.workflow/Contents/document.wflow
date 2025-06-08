@@ -64,59 +64,31 @@
 # Fix PATH for Automator
 export PATH="/Users/ahmed/.pyenv/shims:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
-# Work on the first selected file only (you can extend later)
-filepath="$1"
-if [ ! -f "$filepath" ]; then
-    osascript -e "display notification \"No file selected\" with title \"Error\""
-    exit 1
-fi
+for filepath in "$@"; do
+    if [ ! -f "$filepath" ]; then
+        osascript -e "display notification \"File not found: $filepath\" with title \"Error\""
+        continue
+    fi
 
-# Get directory of the file
-pathname=$(dirname "$filepath")
-cd "$pathname" || exit 1
+    # Get filename parts
+    filename=$(basename "$filepath")
+    base="${filename%.*}"
+    ext="${filename##*.}"
+    dirpath=$(dirname "$filepath")
 
-# Prompt for artwork choice
-artwork_choice=$(
-    osascript &lt;&lt;EOF
-    set selectedOption to choose from list {"artwork.png", "artwork.jpeg", "artwork.jpg"} with title "Artwork Name" with prompt "Choose artwork file:" default items {"artwork.jpg"}
-    if selectedOption is false then
-        return "Cancel"
+    # Output file path
+    output_path="${dirpath}/${base}_cleaned.${ext}"
+
+    # Run AtomicParsley to remove artwork
+    AtomicParsley "$filepath" --artwork REMOVE_ALL -o "$output_path"
+
+    # Check and notify
+    if [ -f "$output_path" ]; then
+        osascript -e "display notification \"Artwork removed from: $filename\" with title \"Saved as: ${base}_cleaned.${ext}\""
     else
-        return item 1 of selectedOption
-    end if
-EOF
-)
-
-# Exit if cancelled
-if [[ "$artwork_choice" == "Cancel" ]]; then
-    osascript -e 'display notification "Cancelled by user." with title "Aborted"'
-    exit 0
-fi
-
-# Prompt for album name
-album_name=$(osascript -e 'Tell application "System Events" to display dialog "Enter album name:" default answer ""' -e 'text returned of result')
-# Prompt for artist name
-artist_name=$(osascript -e 'Tell application "System Events" to display dialog "Enter artist name:" default answer ""' -e 'text returned of result')
-
-# Prepare output file
-filename=$(basename "$filepath")
-base="${filename%.*}"
-ext="${filename##*.}"
-output_file="${pathname}/${base}_tagged.${ext}"
-
-# Run AtomicParsley to embed metadata and artwork
-AtomicParsley "$filepath" \
-  --artwork "$artwork_choice" \
-  --album "$album_name" \
-  --artist "$artist_name" \
-  -o "$output_file"
-
-# Check if successful
-if [ -f "$output_file" ]; then
-    osascript -e "display notification \"Tagged and saved as: ${base}_tagged.${ext}\" with title \"Done!\""
-else
-    osascript -e "display notification \"Failed to tag: $filename\" with title \"Error\""
-fi</string>
+        osascript -e "display notification \"Failed to remove artwork from: $filename\" with title \"Error\""
+    fi
+done</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>
@@ -141,7 +113,7 @@ fi</string>
 				<key>Class Name</key>
 				<string>RunShellScriptAction</string>
 				<key>InputUUID</key>
-				<string>D888AC94-7521-4E10-8E91-9A8F0CFAA206</string>
+				<string>59DBFAB7-FFFE-4EFC-9B2E-0BB5112E6404</string>
 				<key>Keywords</key>
 				<array>
 					<string>Shell</string>
@@ -151,9 +123,9 @@ fi</string>
 					<string>Unix</string>
 				</array>
 				<key>OutputUUID</key>
-				<string>515E5D7C-BF8F-4992-B1D8-0B569D87F3D5</string>
+				<string>0F2805B2-EC83-4FF2-9D41-4C2C23EA878B</string>
 				<key>UUID</key>
-				<string>AD233CD4-D1CE-4E4A-8AA0-0E418850B5BF</string>
+				<string>3A13937D-C517-4686-AC9B-E7B9D1D27472</string>
 				<key>UnlocalizedApplications</key>
 				<array>
 					<string>Automator</string>
@@ -226,6 +198,8 @@ fi</string>
 						<string>4</string>
 					</dict>
 				</dict>
+				<key>conversionLabel</key>
+				<integer>0</integer>
 				<key>isViewVisible</key>
 				<integer>1</integer>
 				<key>location</key>
